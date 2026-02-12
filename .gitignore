@@ -1,0 +1,12 @@
+wp-content/plugins/*
+wp-content/themes/*
+wp-content/uploads/
+wp-content/upgrade/
+wp-content/languages/
+wp-content/cache/
+wp-content/blogs.dir/
+
+!wp-content/themes/arorms
+!wp-content/plugins/enlighter
+
+wp-config.php
