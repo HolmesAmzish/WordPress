@@ -1,6 +1,46 @@
 /*
-Theme Name: Arorms
+Theme Name: Arorms Personal Blog
+Theme URI: https://github.com/HolmesAmzish/WordPress
 Author: Cacciatore
-Version: 1.0
-Description:
+Author URI: 
+Description: A beautiful personal blog theme with Tailwind CSS, inspired by Twenty Twenty-Four but more personal. Features functional sidebar, beautiful large footer, and beautiful homepage. Compatible with Enlighter and other WordPress plugins.
+Requires at least: 6.4
+Tested up to: 6.9
+Requires PHP: 7.4
+Version: 2.0
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: arorms
+Tags: blog, personal, tailwind-css, sidebar, large-footer, responsive, accessibility-ready, custom-colors, custom-menu, custom-logo, editor-style, featured-images, full-site-editing, block-patterns, rtl-language-support, threaded-comments, translation-ready
 */
+
+/* Minimal CSS - Using Tailwind CSS for styling */
+body {
+    margin: 0;
+    padding: 0;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* WordPress core styles */
+.alignwide {
+    max-width: 1200px;
+}
+
+.alignfull {
+    max-width: 100%;
+}
+
+/* Ensure proper spacing for admin bar */
+.admin-bar .sticky {
+    top: 32px;
+}
+
+@media screen and (max-width: 782px) {
+    .admin-bar .sticky {
+        top: 46px;
+    }
+}

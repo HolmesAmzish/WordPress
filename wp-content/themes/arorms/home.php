@@ -1,10 +1,8 @@
 <?php
 /**
- * The main template file
+ * The template for displaying blog posts index
  *
- * This is the most generic template file in a WordPress theme
- * and one of the two required files for a theme (the other being style.css).
- * It is used to display a page when nothing more specific matches a query.
+ * This is the template that displays all blog posts by default.
  *
  * @package Arorms
  */
@@ -16,119 +14,20 @@ get_header();
 <div class="flex flex-col lg:flex-row gap-8">
     <!-- Primary Content -->
     <div class="lg:w-3/4">
-        <?php if ( is_home() && ! is_front_page() ) : ?>
-            <header class="mb-8">
-                <h1 class="text-3xl font-bold text-gray-900"><?php single_post_title(); ?></h1>
-            </header>
-        <?php endif; ?>
-
-        <!-- Featured Posts (only on homepage) -->
-        <?php if ( is_front_page() && ! is_paged() ) : ?>
-            <section id="featured-posts" class="mb-12">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6 pb-2 border-b">Featured Posts</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <?php
-                    $featured_posts = new WP_Query(
-                        array(
-                            'posts_per_page' => 2,
-                            'meta_key'       => '_is_featured',
-                            'meta_value'     => '1',
-                        )
-                    );
-                    
-                    if ( $featured_posts->have_posts() ) :
-                        while ( $featured_posts->have_posts() ) : $featured_posts->the_post();
-                            ?>
-                            <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                                <?php if ( has_post_thumbnail() ) : ?>
-                                    <a href="<?php the_permalink(); ?>" class="block">
-                                        <?php the_post_thumbnail( 'large', array( 'class' => 'w-full h-48 object-cover' ) ); ?>
-                                    </a>
-                                <?php endif; ?>
-                                <div class="p-6">
-                                    <div class="flex items-center text-sm text-gray-500 mb-2">
-                                        <span class="mr-4"><?php echo get_the_date(); ?></span>
-                                        <span class="flex items-center">
-                                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                                            </svg>
-                                            <?php the_author(); ?>
-                                        </span>
-                                    </div>
-                                    <h3 class="text-xl font-bold text-gray-900 mb-3">
-                                        <a href="<?php the_permalink(); ?>" class="hover:text-blue-600 transition-colors">
-                                            <?php the_title(); ?>
-                                        </a>
-                                    </h3>
-                                    <p class="text-gray-700 mb-4"><?php echo wp_trim_words( get_the_excerpt(), 20 ); ?></p>
-                                    <a href="<?php the_permalink(); ?>" 
-                                       class="inline-flex items-center text-blue-600 hover:text-blue-700 font-semibold">
-                                        Read More
-                                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                                        </svg>
-                                    </a>
-                                </div>
-                            </article>
-                            <?php
-                        endwhile;
-                        wp_reset_postdata();
-                    else :
-                        // Fallback to recent posts if no featured posts
-                        $recent_posts = new WP_Query(
-                            array(
-                                'posts_per_page' => 2,
-                            )
-                        );
-                        
-                        while ( $recent_posts->have_posts() ) : $recent_posts->the_post();
-                            ?>
-                            <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                                <?php if ( has_post_thumbnail() ) : ?>
-                                    <a href="<?php the_permalink(); ?>" class="block">
-                                        <?php the_post_thumbnail( 'large', array( 'class' => 'w-full h-48 object-cover' ) ); ?>
-                                    </a>
-                                <?php endif; ?>
-                                <div class="p-6">
-                                    <div class="flex items-center text-sm text-gray-500 mb-2">
-                                        <span class="mr-4"><?php echo get_the_date(); ?></span>
-                                        <span class="flex items-center">
-                                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                                            </svg>
-                                            <?php the_author(); ?>
-                                        </span>
-                                    </div>
-                                    <h3 class="text-xl font-bold text-gray-900 mb-3">
-                                        <a href="<?php the_permalink(); ?>" class="hover:text-blue-600 transition-colors">
-                                            <?php the_title(); ?>
-                                        </a>
-                                    </h3>
-                                    <p class="text-gray-700 mb-4"><?php echo wp_trim_words( get_the_excerpt(), 20 ); ?></p>
-                                    <a href="<?php the_permalink(); ?>" 
-                                       class="inline-flex items-center text-blue-600 hover:text-blue-700 font-semibold">
-                                        Read More
-                                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                                        </svg>
-                                    </a>
-                                </div>
-                            </article>
-                            <?php
-                        endwhile;
-                        wp_reset_postdata();
-                    endif;
-                    ?>
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900"><?php single_post_title(); ?></h1>
+            <?php
+            $description = get_the_archive_description();
+            if ( $description ) :
+                ?>
+                <div class="mt-4 text-gray-600 prose max-w-none">
+                    <?php echo wp_kses_post( $description ); ?>
                 </div>
-            </section>
-        <?php endif; ?>
-
-        <!-- Recent Posts Section -->
-        <section id="recent-posts" class="<?php echo ( is_front_page() && ! is_paged() ) ? 'mb-12' : ''; ?>">
-            <?php if ( is_front_page() && ! is_paged() ) : ?>
-                <h2 class="text-2xl font-bold text-gray-900 mb-6 pb-2 border-b">Recent Posts</h2>
             <?php endif; ?>
+        </header>
 
+        <!-- Blog Posts -->
+        <section id="blog-posts">
             <?php if ( have_posts() ) : ?>
                 <div class="space-y-8">
                     <?php
