@@ -13,9 +13,9 @@ get_header();
 ?>
 
 <!-- Main Content Area -->
-<div class="flex flex-col lg:flex-row gap-8">
+<div class="flex flex-col lg:flex-row gap-8 items-stretch">
     <!-- Primary Content -->
-    <div class="lg:w-3/4">
+    <div class="lg:w-3/4 h-full">
         <?php if ( is_home() && ! is_front_page() ) : ?>
             <header class="mb-8">
                 <h1 class="text-3xl font-bold text-gray-900"><?php single_post_title(); ?></h1>
@@ -23,7 +23,7 @@ get_header();
         <?php endif; ?>
 
         <!-- Featured Posts (only on homepage) -->
-        <?php if ( is_front_page() && ! is_paged() ) : ?>
+        <!-- <?php if ( is_front_page() && ! is_paged() ) : ?>
             <section id="featured-posts" class="mb-12">
                 <h2 class="text-2xl font-bold text-gray-900 mb-6 pb-2 border-b">Featured Posts</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -121,13 +121,13 @@ get_header();
                     ?>
                 </div>
             </section>
-        <?php endif; ?>
+        <?php endif; ?> -->
 
         <!-- Recent Posts Section -->
         <section id="recent-posts" class="<?php echo ( is_front_page() && ! is_paged() ) ? 'mb-12' : ''; ?>">
-            <?php if ( is_front_page() && ! is_paged() ) : ?>
+            <!-- <?php if ( is_front_page() && ! is_paged() ) : ?>
                 <h2 class="text-2xl font-bold text-gray-900 mb-6 pb-2 border-b">Recent Posts</h2>
-            <?php endif; ?>
+            <?php endif; ?> -->
 
             <?php if ( have_posts() ) : ?>
                 <div class="space-y-8">
@@ -212,17 +212,30 @@ get_header();
                 </div>
 
                 <!-- Pagination -->
-                <nav class="mt-12 flex justify-center">
-                    <?php
-                    the_posts_pagination(
-                        array(
+                <nav class="mt-12">
+                    <div class="flex items-center justify-center space-x-2">
+                        <?php
+                        // Simple and elegant pagination
+                        $pagination_args = array(
                             'mid_size'  => 2,
-                            'prev_text' => __( 'Previous', 'arorms' ),
-                            'next_text' => __( 'Next', 'arorms' ),
-                            'class'     => 'pagination',
-                        )
-                    );
-                    ?>
+                            'prev_text' => '<span class="flex items-center px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                </svg>
+                                ' . __( 'Previous', 'arorms' ) . '
+                            </span>',
+                            'next_text' => '<span class="flex items-center px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors">
+                                ' . __( 'Next', 'arorms' ) . '
+                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </span>',
+                            'type'      => 'plain',
+                        );
+                        
+                        echo paginate_links( $pagination_args );
+                        ?>
+                    </div>
                 </nav>
             <?php else : ?>
                 <div class="text-center py-12">
@@ -237,7 +250,7 @@ get_header();
     </div><!-- End Primary Content -->
 
     <!-- Sidebar -->
-    <div class="lg:w-1/4">
+    <div class="lg:w-1/4 h-full">
         <?php get_sidebar(); ?>
     </div>
 </div><!-- End flex container -->

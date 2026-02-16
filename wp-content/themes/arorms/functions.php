@@ -566,3 +566,160 @@ function arorms_save_subtitle_meta( $post_id ) {
 	}
 }
 add_action( 'save_post', 'arorms_save_subtitle_meta' );
+add_filter( 'big_image_size_threshold', '__return_false' );
+
+/**
+ * Generate table of contents from post content
+ */
+function arorms_generate_toc( $content = null ) {
+    // Only generate TOC for single posts
+    if ( ! is_single() ) {
+        return '';
+    }
+    
+    // If no content provided, get current post content
+    if ( $content === null ) {
+        global $post;
+        if ( ! $post ) {
+            return '';
+        }
+        $content = $post->post_content;
+    }
+    
+    // Extract headings h1-h3
+    $pattern = '/<h([1-3])(?:.*?)>(.*?)<\/h[1-3]>/i';
+    preg_match_all( $pattern, $content, $matches, PREG_SET_ORDER );
+    
+    if ( empty( $matches ) ) {
+        return '<div class="toc-empty bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b">Table of Contents</h3>
+                    <p class="text-gray-600 text-center py-4">No headings found in this article.</p>
+                </div>';
+    }
+    
+    $toc_html = '<div class="toc-widget bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b">Table of Contents</h3>
+                    <nav class="toc-nav" aria-label="Article navigation">';
+    
+    $current_level = 0;
+    $toc_items = array();
+    
+    foreach ( $matches as $index => $match ) {
+        $level = intval( $match[1] );
+        $title = strip_tags( $match[2] );
+        $title = trim( $title );
+        
+        // Generate slug for anchor
+        $slug = sanitize_title( $title );
+        $slug = 'section-' . ( $index + 1 ) . '-' . $slug;
+        
+        $toc_items[] = array(
+            'level' => $level,
+            'title' => $title,
+            'slug'  => $slug,
+            'index' => $index
+        );
+    }
+    
+    // Build hierarchical TOC
+    $prev_level = 0;
+    foreach ( $toc_items as $item ) {
+        $level = $item['level'];
+        $title = $item['title'];
+        $slug = $item['slug'];
+        
+        // Add level class for styling
+        $level_class = 'toc-level-' . $level;
+        $indent_class = '';
+        
+        if ( $level == 2 ) {
+            $indent_class = 'ml-4';
+        } elseif ( $level == 3 ) {
+            $indent_class = 'ml-8';
+        }
+        
+        $toc_html .= '<a href="#' . esc_attr( $slug ) . '" 
+                         class="toc-item ' . $level_class . ' ' . $indent_class . ' block py-2 text-gray-700 hover:text-blue-600 transition-colors border-l-2 border-transparent hover:border-blue-500 pl-2">
+                         ' . esc_html( $title ) . '
+                      </a>';
+        
+        $prev_level = $level;
+    }
+    
+    $toc_html .= '</nav></div>';
+    
+    return $toc_html;
+}
+
+/**
+ * Add IDs to headings in post content for TOC linking
+ */
+function arorms_add_heading_ids( $content ) {
+    if ( ! is_single() ) {
+        return $content;
+    }
+    
+    $pattern = '/<h([1-3])(?:.*?)>(.*?)<\/h[1-3]>/i';
+    preg_match_all( $pattern, $content, $matches, PREG_SET_ORDER );
+    
+    foreach ( $matches as $index => $match ) {
+        $full_match = $match[0];
+        $level = $match[1];
+        $title = strip_tags( $match[2] );
+        $title = trim( $title );
+        
+        // Generate slug for anchor
+        $slug = sanitize_title( $title );
+        $slug = 'section-' . ( $index + 1 ) . '-' . $slug;
+        
+        // Check if heading already has an ID
+        if ( strpos( $full_match, 'id=' ) === false ) {
+            // Add ID to heading
+            $new_heading = str_replace( '<h' . $level, '<h' . $level . ' id="' . $slug . '"', $full_match );
+            $content = str_replace( $full_match, $new_heading, $content );
+        }
+    }
+    
+    return $content;
+}
+add_filter( 'the_content', 'arorms_add_heading_ids' );
+
+/**
+ * Enqueue TOC scripts and styles
+ */
+function arorms_toc_scripts() {
+    if ( is_single() ) {
+        wp_enqueue_script( 'arorms-toc-script', get_template_directory_uri() . '/assets/js/toc.js', array(), wp_get_theme()->get( 'Version' ), true );
+        wp_add_inline_style( 'arorms-style', '
+            .toc-item {
+                position: relative;
+                transition: all 0.2s ease;
+            }
+            .toc-item.toc-level-1 {
+                font-weight: 600;
+                font-size: 1rem;
+            }
+            .toc-item.toc-level-2 {
+                font-weight: 500;
+                font-size: 0.95rem;
+            }
+            .toc-item.toc-level-3 {
+                font-weight: 400;
+                font-size: 0.9rem;
+                color: #6b7280;
+            }
+            .toc-item.active {
+                color: #3b82f6;
+                border-left-color: #3b82f6 !important;
+                background-color: #eff6ff;
+            }
+            /* Remove sticky positioning and scrollbar */
+            .toc-widget {
+                position: static;
+                max-height: none;
+                overflow-y: visible;
+            }
+        ' );
+    }
+}
+add_action( 'wp_enqueue_scripts', 'arorms_toc_scripts' );

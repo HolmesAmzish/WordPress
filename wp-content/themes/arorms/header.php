@@ -89,22 +89,23 @@
     </header>
 
     <!-- Hero Section (only on homepage) -->
-    <?php if ( is_front_page() && ! is_paged() ) :
-    $bg_image_url = get_template_directory_uri() . '/assets/images/background-1.jpg'; ?>
-    
-    <section class="relative bg-fixed min-h-[70vh] bg-cover bg-center text-white py-20 md:py-32 overflow-hidden"
-             style="background-image: url('<?php echo esc_url($bg_image_url); ?>');">
+    <?php if ( is_front_page() && ! is_paged() ) : ?>
+    <section class="relative bg-fixed min-h-screen bg-cover bg-center text-white flex items-center justify-center overflow-hidden -mt-16 pt-16"
+             style="background-image: url('/wp-content/themes/arorms/assets/images/background-1.jpg');">
         
-        <div class="absolute inset-0 bg-gray-900/25 z-0"></div>
+        <div class="absolute inset-0 bg-gray-900/40 z-0"></div>
 
         <div class="container mx-auto px-4 text-center relative z-10">
             <div class="max-w-4xl mx-auto space-y-6">
-                <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-4 drop-shadow-lg">
-                    Blog of Cacciatore
+                <h1 class="font-sans text-4xl md:text-6xl font-extrabold tracking-tight mb-4 drop-shadow-lg">
+                    BLOG OF CACCIATORE
                 </h1>
                 
-                <p class="text-lg md:text-2xl mb-8 text-gray-100 drop-shadow-md leading-relaxed">
-                    Sharing thoughts, experiences, and insights from my journey
+                <p class="text-lg font-serif md:text-3xl mb-8 text-gray-100 drop-shadow-md leading-relaxed">
+                    Ask, and it will be given to you.<br>
+                    Seek, and you will find.<br>
+                    Knock, and the door will be opened to you.<br>
+                    MATTHEW 7:7
                 </p>
 
                 <div class="flex flex-col sm:flex-row gap-4 justify-center pt-4">
@@ -113,16 +114,18 @@
                     </a>
                     <a href="<?php echo esc_url( get_permalink( get_option( 'page_for_posts' ) ) ); ?>" 
                        class="bg-white/10 backdrop-blur-md border border-white/30 hover:bg-white/20 px-8 py-3 rounded-full font-bold transition-all transform hover:-translate-y-1">
-                        Browse latest article
+                        Read latest article
                     </a>
                 </div>
             </div>
         </div>
 
-        <div class="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-gray-50 to-transparent"></div>
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 14l-7 7m0 0l-7-7m7 7V3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
     </section>
 <?php endif; ?>
 
     <!-- Main Content Area -->
     <main class="flex-grow container mx-auto px-4 py-8">
-        <div class="flex flex-col lg:flex-row gap-8">
+        <div class="flex flex-col lg:flex-row gap-8 items-stretch">

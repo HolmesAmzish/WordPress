@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Dropdown menu functionality
+    // Dropdown menu functionality (keeping this as it might be useful for other menus)
     const dropdownParents = document.querySelectorAll('.menu-item-has-children');
     dropdownParents.forEach(parent => {
         parent.addEventListener('mouseenter', function() {
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Back to top button
+    // Back to top button (simplified version)
     const backToTopButton = document.createElement('button');
     backToTopButton.innerHTML = `
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,9 +69,10 @@ document.addEventListener('DOMContentLoaded', function() {
     `;
     backToTopButton.className = 'fixed bottom-8 right-8 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors duration-200 hidden z-40';
     backToTopButton.setAttribute('aria-label', 'Back to top');
+    backToTopButton.setAttribute('type', 'button');
     document.body.appendChild(backToTopButton);
     
-    // Show/hide back to top button
+    // Simple show/hide logic
     window.addEventListener('scroll', function() {
         if (window.pageYOffset > 300) {
             backToTopButton.classList.remove('hidden');
@@ -80,13 +81,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Back to top functionality
+    // Simple click handler
     backToTopButton.addEventListener('click', function() {
         window.scrollTo({
             top: 0,
             behavior: 'smooth'
         });
     });
+    
+    // Initial state
+    if (window.pageYOffset <= 300) {
+        backToTopButton.classList.add('hidden');
+    }
     
     // Lazy loading for images
     if ('IntersectionObserver' in window) {

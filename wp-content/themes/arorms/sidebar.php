@@ -19,22 +19,27 @@
         </form>
     </div>
 
-    <!-- About Me Widget -->
-    <div class="bg-white p-6 rounded-lg shadow-md">
-        <h3 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b">About Me</h3>
-        <div class="flex items-center space-x-4 mb-4">
-            <div class="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-xl">
-                <?php echo substr( get_bloginfo( 'name' ), 0, 1 ); ?>
+    <!-- Table of Contents (only on single post pages) -->
+    <?php if ( is_single() ) : ?>
+        <?php echo arorms_generate_toc(); ?>
+    <?php else : ?>
+        <!-- About Me Widget (shown on non-single pages) -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b">About Me</h3>
+            <div class="flex items-center space-x-4 mb-4">
+                <div class="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold font-serif text-xl">
+                    C
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900">Cacciatore</h4>
+                    <p class="text-sm text-gray-600">Owner & Developer</p>
+                </div>
             </div>
-            <div>
-                <h4 class="font-semibold text-gray-900"><?php echo get_bloginfo( 'name' ); ?></h4>
-                <p class="text-sm text-gray-600">Blogger & Developer</p>
-            </div>
+            <p class="text-gray-500 italic font-serif">
+                You will know the truth, and the truth will set you free.
+            </p>
         </div>
-        <p class="text-gray-700">
-            Welcome to my personal blog where I share thoughts on technology, creativity, and life experiences.
-        </p>
-    </div>
+    <?php endif; ?>
 
     <!-- Recent Posts Widget -->
     <div class="bg-white p-6 rounded-lg shadow-md">
@@ -118,7 +123,7 @@
     </div>
 
     <!-- Newsletter Widget -->
-    <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-6 rounded-lg shadow-md">
+    <!-- <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-6 rounded-lg shadow-md">
         <h3 class="text-xl font-bold mb-4">Newsletter</h3>
         <p class="mb-4 text-blue-100">Subscribe to get the latest posts directly in your inbox.</p>
         <form class="space-y-3">
@@ -130,7 +135,7 @@
                 Subscribe
             </button>
         </form>
-    </div>
+    </div> -->
 
     <!-- Dynamic Sidebar Widgets -->
     <?php if ( is_active_sidebar( 'sidebar-1' ) ) : ?>
