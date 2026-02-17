@@ -13,7 +13,7 @@ get_header();
 ?>
 
 <!-- Main Content Area -->
-<div class="flex flex-col lg:flex-row gap-8 items-stretch">
+<div class="flex flex-col lg:flex-row gap-8 w-full">
     <!-- Primary Content -->
     <div class="lg:w-3/4 h-full">
         <?php if ( is_home() && ! is_front_page() ) : ?>

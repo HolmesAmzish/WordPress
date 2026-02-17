@@ -141,4 +141,13 @@
     <?php if ( is_active_sidebar( 'sidebar-1' ) ) : ?>
         <?php dynamic_sidebar( 'sidebar-1' ); ?>
     <?php endif; ?>
-</aside>
+
+    <!-- Language Switcher in Sidebar -->
+    <?php if ( function_exists( 'pll_the_languages' ) ) : ?>
+    <div class="flex justify bg-white p-6 rounded-lg shadow-md mt-8">
+        <h3 class="text-xl font-bold text-gray-800 mr-6"><?php _e( 'Language', 'arorms' ); ?></h3>
+        <div class="language-switcher-sidebar">
+            <?php echo arorms_dropdown_language_switcher(); ?>
+        </div>
+    </div>
+    <?php endif; ?>

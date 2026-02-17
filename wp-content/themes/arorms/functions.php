@@ -364,9 +364,21 @@ add_action( 'widgets_init', 'arorms_widgets_init' );
 
 /**
  * Custom excerpt length.
+ * For Chinese content: 30-50 characters
+ * For English content: 25 words
  */
 function arorms_excerpt_length( $length ) {
-	return 25;
+    // Check if the content is Chinese
+    $content = get_the_content();
+    $chinese_char_count = preg_match_all('/[\x{4e00}-\x{9fa5}]/u', $content);
+    $total_char_count = mb_strlen($content, 'UTF-8');
+    
+    // If Chinese characters make up more than 30% of the content, treat as Chinese
+    if ($total_char_count > 0 && ($chinese_char_count / $total_char_count) > 0.3) {
+        return 40; // Return character count for Chinese (middle of 30-50 range)
+    }
+    
+    return 25; // Default word count for English
 }
 add_filter( 'excerpt_length', 'arorms_excerpt_length' );
 
@@ -377,6 +389,47 @@ function arorms_excerpt_more( $more ) {
 	return '...';
 }
 add_filter( 'excerpt_more', 'arorms_excerpt_more' );
+
+/**
+ * Custom excerpt for Chinese content - character-based trimming
+ */
+function arorms_custom_excerpt( $excerpt ) {
+    // Check if the excerpt is Chinese
+    $chinese_char_count = preg_match_all('/[\x{4e00}-\x{9fa5}]/u', $excerpt);
+    $total_char_count = mb_strlen($excerpt, 'UTF-8');
+    
+    // If Chinese characters make up more than 30% of the excerpt
+    if ($total_char_count > 0 && ($chinese_char_count / $total_char_count) > 0.3) {
+        // Trim to 30-50 characters for Chinese
+        $max_length = 50;
+        $min_length = 30;
+        
+        if (mb_strlen($excerpt, 'UTF-8') > $max_length) {
+            $excerpt = mb_substr($excerpt, 0, $max_length, 'UTF-8');
+            
+            // Try to find a good breaking point (punctuation or space)
+            $last_punctuation = max(
+                mb_strrpos($excerpt, '。', 0, 'UTF-8'),
+                mb_strrpos($excerpt, '！', 0, 'UTF-8'),
+                mb_strrpos($excerpt, '？', 0, 'UTF-8'),
+                mb_strrpos($excerpt, '，', 0, 'UTF-8'),
+                mb_strrpos($excerpt, '.', 0, 'UTF-8'),
+                mb_strrpos($excerpt, '!', 0, 'UTF-8'),
+                mb_strrpos($excerpt, '?', 0, 'UTF-8'),
+                mb_strrpos($excerpt, ',', 0, 'UTF-8')
+            );
+            
+            if ($last_punctuation !== false && $last_punctuation > $min_length) {
+                $excerpt = mb_substr($excerpt, 0, $last_punctuation + 1, 'UTF-8');
+            }
+            
+            $excerpt .= '...';
+        }
+    }
+    
+    return $excerpt;
+}
+add_filter( 'get_the_excerpt', 'arorms_custom_excerpt' );
 
 /**
  * Add custom classes to body.
@@ -723,3 +776,379 @@ function arorms_toc_scripts() {
     }
 }
 add_action( 'wp_enqueue_scripts', 'arorms_toc_scripts' );
+
+/**
+ * Custom dropdown language switcher for Polylang
+ */
+function arorms_dropdown_language_switcher() {
+    if ( ! function_exists( 'pll_the_languages' ) ) {
+        return '';
+    }
+    
+    $languages = pll_the_languages( array(
+        'raw' => 1, // Return raw data instead of HTML
+    ) );
+    
+    if ( empty( $languages ) ) {
+        return '';
+    }
+    
+    $current_language = null;
+    foreach ( $languages as $language ) {
+        if ( $language['current_lang'] ) {
+            $current_language = $language;
+            break;
+        }
+    }
+    
+    if ( ! $current_language ) {
+        $current_language = reset( $languages );
+    }
+    
+    ob_start();
+    ?>
+    <div class="language-switcher-dropdown relative inline-block">
+        <button type="button" 
+                class="language-dropdown-toggle flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                aria-expanded="false"
+                aria-haspopup="true"
+                id="language-dropdown-button">
+            <?php if ( $current_language['flag'] ) : ?>
+                <img src="<?php echo esc_url( $current_language['flag'] ); ?>" 
+                     alt="<?php echo esc_attr( $current_language['name'] ); ?>" 
+                     class="w-5 h-4 rounded-sm">
+            <?php endif; ?>
+            <span class="text-gray-700 font-medium"><?php echo esc_html( strtoupper( $current_language['slug'] ) ); ?></span>
+            <svg class="w-4 h-4 text-gray-500 transition-transform duration-200" 
+                 fill="none" 
+                 stroke="currentColor" 
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        
+        <div class="language-dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 hidden transform opacity-0 scale-95 transition-all duration-200 origin-top-right"
+             role="menu"
+             aria-orientation="vertical"
+             aria-labelledby="language-dropdown-button">
+            <?php foreach ( $languages as $language ) : ?>
+                <a href="<?php echo esc_url( $language['url'] ); ?>" 
+                   class="language-dropdown-item flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-150 <?php echo $language['current_lang'] ? 'bg-blue-50 text-blue-700 font-semibold' : ''; ?>"
+                   role="menuitem"
+                   hreflang="<?php echo esc_attr( $language['slug'] ); ?>"
+                   lang="<?php echo esc_attr( $language['slug'] ); ?>">
+                    <?php if ( $language['flag'] ) : ?>
+                        <img src="<?php echo esc_url( $language['flag'] ); ?>" 
+                             alt="<?php echo esc_attr( $language['name'] ); ?>" 
+                             class="w-5 h-4 rounded-sm">
+                    <?php endif; ?>
+                    <span class="flex-1"><?php echo esc_html( $language['name'] ); ?></span>
+                    <?php if ( $language['current_lang'] ) : ?>
+                        <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                    <?php endif; ?>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    
+    <script>
+    (function() {
+        const dropdownButton = document.getElementById('language-dropdown-button');
+        const dropdownMenu = dropdownButton?.nextElementSibling;
+        
+        if (!dropdownButton || !dropdownMenu) return;
+        
+        dropdownButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            this.setAttribute('aria-expanded', !isExpanded);
+            
+            if (isExpanded) {
+                dropdownMenu.classList.add('hidden', 'opacity-0', 'scale-95');
+                dropdownMenu.classList.remove('block', 'opacity-100', 'scale-100');
+            } else {
+                dropdownMenu.classList.remove('hidden', 'opacity-0', 'scale-95');
+                dropdownMenu.classList.add('block', 'opacity-100', 'scale-100');
+            }
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!dropdownButton.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                dropdownButton.setAttribute('aria-expanded', 'false');
+                dropdownMenu.classList.add('hidden', 'opacity-0', 'scale-95');
+                dropdownMenu.classList.remove('block', 'opacity-100', 'scale-100');
+            }
+        });
+        
+        // Close dropdown on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                dropdownButton.setAttribute('aria-expanded', 'false');
+                dropdownMenu.classList.add('hidden', 'opacity-0', 'scale-95');
+                dropdownMenu.classList.remove('block', 'opacity-100', 'scale-100');
+            }
+        });
+        
+        // Ensure language links work properly
+        const languageLinks = dropdownMenu.querySelectorAll('.language-dropdown-item');
+        languageLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Allow normal link behavior
+                // No need to prevent default or stop propagation
+                console.log('Language link clicked:', this.href);
+            });
+        });
+    })();
+    </script>
+    <?php
+    return ob_get_clean();
+}
+
+/**
+ * Fix Polylang URL issues for multi-domain setup
+ * This ensures Polylang uses the correct domain for language switching
+ */
+function arorms_fix_polylang_urls( $url, $lang ) {
+    // If URL is empty or invalid, return it as-is
+    if (empty($url) || !is_string($url)) {
+        return $url;
+    }
+    
+    // Get current host (the domain user is currently accessing from)
+    $current_host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
+    
+    if (empty($current_host)) {
+        return $url;
+    }
+    
+    // Parse the URL
+    $parsed_url = parse_url($url);
+    
+    if ($parsed_url === false) {
+        return $url;
+    }
+    
+    // Check if we have a host in the parsed URL
+    if (!isset($parsed_url['host'])) {
+        return $url;
+    }
+    
+    $url_host = $parsed_url['host'];
+    
+    // Check if the URL host is different from current host
+    if ($url_host !== $current_host) {
+        // Get current host parts (with or without port)
+        $current_host_parts = explode(':', $current_host);
+        $current_host_without_port = $current_host_parts[0];
+        $current_port = count($current_host_parts) > 1 ? $current_host_parts[1] : null;
+        
+        // Check if current host is a domain name (not local IP)
+        $is_domain_name = !filter_var($current_host_without_port, FILTER_VALIDATE_IP) && strpos($current_host_without_port, '.') !== false;
+        
+        // Replace the host with current host
+        $parsed_url['host'] = $current_host_without_port;
+        
+        // Handle port
+        if ($is_domain_name) {
+            // For domain access, remove port (remote uses 443, no port needed in URL)
+            unset($parsed_url['port']);
+        } else {
+            // For IP access, use port from current host if present
+            if ($current_port !== null) {
+                $parsed_url['port'] = $current_port;
+            }
+            // If no port in current host but URL has port, keep URL port
+        }
+        
+        // Rebuild the URL
+        $new_url = '';
+        
+        // Add scheme
+        if (isset($parsed_url['scheme'])) {
+            $new_url .= $parsed_url['scheme'] . '://';
+        } else {
+            // Use https for domain, http for IP
+            $new_url .= $is_domain_name ? 'https://' : 'http://';
+        }
+        
+        // Add host
+        $new_url .= $parsed_url['host'];
+        
+        // Add port if present
+        if (isset($parsed_url['port'])) {
+            $new_url .= ':' . $parsed_url['port'];
+        }
+        
+        // Add path
+        if (isset($parsed_url['path'])) {
+            $new_url .= $parsed_url['path'];
+        }
+        
+        // Add query
+        if (isset($parsed_url['query'])) {
+            $new_url .= '?' . $parsed_url['query'];
+        }
+        
+        // Add fragment
+        if (isset($parsed_url['fragment'])) {
+            $new_url .= '#' . $parsed_url['fragment'];
+        }
+        
+        return $new_url;
+    }
+    
+    return $url;
+}
+add_filter( 'pll_the_language_link', 'arorms_fix_polylang_urls', 10, 2 );
+
+/**
+ * Add Polylang language switcher styles
+ */
+function arorms_polylang_styles() {
+    if ( function_exists( 'pll_the_languages' ) ) {
+        wp_add_inline_style( 'arorms-style', '
+            /* Desktop language switcher */
+            .language-switcher ul {
+                display: flex;
+                gap: 8px;
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+            
+            .language-switcher li {
+                margin: 0;
+            }
+            
+            .language-switcher a {
+                display: flex;
+                align-items: center;
+                padding: 4px 8px;
+                border-radius: 4px;
+                text-decoration: none;
+                transition: all 0.2s ease;
+                border: 1px solid transparent;
+            }
+            
+            .language-switcher a:hover {
+                background-color: #f3f4f6;
+                border-color: #d1d5db;
+            }
+            
+            .language-switcher .current-lang a {
+                background-color: #3b82f6;
+                color: white;
+                border-color: #2563eb;
+            }
+            
+            .language-switcher .current-lang a:hover {
+                background-color: #2563eb;
+            }
+            
+            .language-switcher img {
+                width: 20px;
+                height: 15px;
+                margin-right: 4px;
+                border-radius: 2px;
+            }
+            
+            /* Mobile language switcher */
+            .language-switcher-mobile ul {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+            
+            .language-switcher-mobile li {
+                margin: 0;
+            }
+            
+            .language-switcher-mobile a {
+                display: flex;
+                align-items: center;
+                padding: 6px 10px;
+                border-radius: 6px;
+                text-decoration: none;
+                background-color: #f9fafb;
+                border: 1px solid #e5e7eb;
+                font-size: 14px;
+                transition: all 0.2s ease;
+            }
+            
+            .language-switcher-mobile a:hover {
+                background-color: #f3f4f6;
+                border-color: #d1d5db;
+            }
+            
+            .language-switcher-mobile .current-lang a {
+                background-color: #3b82f6;
+                color: white;
+                border-color: #2563eb;
+            }
+            
+            .language-switcher-mobile .current-lang a:hover {
+                background-color: #2563eb;
+            }
+            
+            .language-switcher-mobile img {
+                width: 20px;
+                height: 15px;
+                margin-right: 6px;
+                border-radius: 2px;
+            }
+            
+            /* Dropdown language switcher */
+            .language-switcher-dropdown {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            }
+            
+            .language-dropdown-toggle {
+                min-width: 100px;
+                justify-content: space-between;
+            }
+            
+            .language-dropdown-toggle:hover svg {
+                transform: rotate(180deg);
+            }
+            
+            .language-dropdown-toggle[aria-expanded="true"] svg {
+                transform: rotate(180deg);
+            }
+            
+            .language-dropdown-menu {
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            }
+            
+            .language-dropdown-menu.block {
+                display: block;
+            }
+            
+            .language-dropdown-menu.opacity-100 {
+                opacity: 1;
+            }
+            
+            .language-dropdown-menu.scale-100 {
+                transform: scale(1);
+            }
+            
+            .language-dropdown-item {
+                border-left: 3px solid transparent;
+            }
+            
+            .language-dropdown-item:hover {
+                border-left-color: #3b82f6;
+            }
+            
+            .language-dropdown-item.bg-blue-50 {
+                border-left-color: #3b82f6;
+            }
+        ' );
+    }
+}
+add_action( 'wp_enqueue_scripts', 'arorms_polylang_styles' );

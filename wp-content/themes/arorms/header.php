@@ -43,6 +43,7 @@
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
+                    
                 </div>
 
                 <!-- Primary Navigation -->
@@ -60,6 +61,7 @@
                     );
                     ?>
                 </nav>
+
 
                 <!-- Mobile Menu Button -->
                 <button class="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" 
@@ -84,6 +86,7 @@
                     )
                 );
                 ?>
+                
             </div>
         </div>
     </header>
